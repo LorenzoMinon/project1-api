@@ -7,7 +7,8 @@ import (
 )
 
 func main() {
-	http.HandleFunc("/products", handlers.GetProducts)
-	http.HandleFunc("/products/{id}", handlers.GetProductByID)
+	http.HandleFunc("GET /products", handlers.GetProducts)
+	http.HandleFunc("GET /products/{id}", handlers.GetProductByID)
+	http.HandleFunc("POST /products", handlers.CreateProduct)
 	http.ListenAndServe(":8000", nil)
 }

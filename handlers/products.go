@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"io"
 	"net/http"
 	"strconv"
 )
@@ -57,4 +58,31 @@ func GetProductByID(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(data)
+}
+
+func CreateProduct(w http.ResponseWriter, r *http.Request) {
+	body, err := io.ReadAll(r.Body) //reads body and saves it.
+	if err != nil {
+		http.Error(w, "data error (no body request)", http.StatusBadRequest)
+		return
+	}
+
+	var newProduct Product
+	err = json.Unmarshal(body, &newProduct)
+	if err != nil {
+		http.Error(w, "invalid json", http.StatusBadRequest)
+		return
+	}
+	newProduct.ID = nextID
+	nextID++
+	products = append(products, newProduct)
+
+	data, err := json.Marshal(newProduct)
+	if err != nil {
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	w.Write(data)
+
 }
