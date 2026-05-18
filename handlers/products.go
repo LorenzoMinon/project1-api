@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 )
 
 type Product struct {
@@ -28,5 +29,32 @@ func GetProducts(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
+	w.Write(data)
+}
+
+func GetProductByID(w http.ResponseWriter, r *http.Request) {
+	var foundProduct *Product
+	id_str := r.PathValue("id")
+	product_id, err := strconv.Atoi(id_str)
+	if err != nil {
+		http.Error(w, "invalid id", http.StatusBadRequest)
+		return
+	}
+
+	for i := range products {
+		if products[i].ID == product_id {
+			foundProduct = &products[i]
+		}
+	}
+	if foundProduct == nil {
+		http.Error(w, "product not found", http.StatusNotFound)
+		return
+	}
+	data, err := json.Marshal(foundProduct)
+	if err != nil {
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
 	w.Write(data)
 }
