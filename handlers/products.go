@@ -86,3 +86,27 @@ func CreateProduct(w http.ResponseWriter, r *http.Request) {
 	w.Write(data)
 
 }
+
+func DeleteProduct(w http.ResponseWriter, r *http.Request) {
+	foundIndex := -1
+	id_str := r.PathValue("id")
+	product_id, err := strconv.Atoi(id_str)
+	if err != nil {
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+	}
+	for i := range products {
+		if products[i].ID == product_id {
+			foundIndex = i
+			break
+		}
+	}
+	if foundIndex == -1 {
+		http.Error(w, "invalid index", http.StatusInternalServerError)
+		return
+	}
+	products = append(products[:foundIndex], products[foundIndex+1:]...)
+	if err != nil {
+		http.Error(w, "internal error server parsing to json", http.StatusInternalServerError)
+	}
+	w.WriteHeader(http.StatusNoContent)
+}
