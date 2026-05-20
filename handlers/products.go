@@ -110,3 +110,46 @@ func DeleteProduct(w http.ResponseWriter, r *http.Request) {
 	}
 	w.WriteHeader(http.StatusNoContent)
 }
+
+func UpdateStock(w http.ResponseWriter, r *http.Request) {
+	foundIndex := -1
+	var updatedProduct Product
+	// concrete variable, not a pointer!!! Unmarshal needs
+	// a real address using >>> &
+	str_id := r.PathValue("id")
+	product_id, err := strconv.Atoi(str_id)
+	if err != nil {
+		http.Error(w, "cannot convert to int", http.StatusInternalServerError)
+		return
+	}
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, "cannot read body", http.StatusInternalServerError)
+		return
+	}
+	err = json.Unmarshal(body, &updatedProduct)
+	if err != nil {
+		http.Error(w, "invalid json", http.StatusBadRequest)
+		return
+	}
+	newStock := updatedProduct.Stock
+	for i := range products {
+		if products[i].ID == product_id {
+			foundIndex = i
+			products[i].Stock = newStock
+			break
+		}
+	}
+	if foundIndex == -1 {
+		http.Error(w, "product not found", http.StatusNotFound)
+		return
+	}
+	data, err := json.Marshal(products[foundIndex])
+	if err != nil {
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(data)
+
+}

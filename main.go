@@ -11,5 +11,6 @@ func main() {
 	http.HandleFunc("GET /products/{id}", handlers.GetProductByID)
 	http.HandleFunc("POST /products", handlers.CreateProduct)
 	http.HandleFunc("DELETE /products/{id}", handlers.DeleteProduct)
+	http.HandleFunc("PUT /products/{id}", handlers.UpdateStock)
 	http.ListenAndServe(":8000", nil)
 }
